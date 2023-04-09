@@ -6,6 +6,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/bind.hpp>
 
 #include "alert.h"
 #include "chainparams.h"
@@ -52,7 +53,7 @@ unsigned int GetStakeMinAge(int64_t nTime)
 {
     if (TestNet())
         return 2 * 60 * 60; // minimum age: 2 hours
-        
+
     if (nTime > nHardforkTime)
         return 60 * 60 * 24 * 30; //minimum age: 30 days
 
@@ -2031,7 +2032,7 @@ CMerkleBlock::CMerkleBlock(const CBlock& block, CBloomFilter& filter)
 // ppcoin: total coin age spent in transaction, in the unit of coin-days.
 // Only those coins meeting minimum age requirement counts. As those
 // transactions not in main chain are not currently indexed so we
-// might not find out about their coin age. Older transactions are 
+// might not find out about their coin age. Older transactions are
 // guaranteed to be in main chain by sync-checkpoint. This rule is
 // introduced to help nodes establish a consistent view of the coin
 // age (trust score) of competing branches.
@@ -3131,7 +3132,7 @@ void static ProcessGetData(CNode* pfrom)
             g_signals.Inventory(inv.hash);
 
             // -- break here to give chance to process other messages
-            //    ProcessGetData will be called again in ProcessMessages        
+            //    ProcessGetData will be called again in ProcessMessages
             if (inv.type == MSG_BLOCK || inv.type == MSG_FILTERED_BLOCK)
                 break;
         }
@@ -3279,7 +3280,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         // ppcoin: ask for pending sync-checkpoint if any
         if (!IsInitialBlockDownload())
             Checkpoints::AskForPendingSyncCheckpoint(pfrom);
-		
+
         int64_t nTimeOffset = nTime - GetTime();
         pfrom->nTimeOffset = nTimeOffset;
         if (GetBoolArg("-synctime", true))
@@ -3616,8 +3617,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
     // This asymmetric behavior for inbound and outbound connections was introduced
     // to prevent a fingerprinting attack: an attacker can send specific fake addresses
-    // to users' AddrMan and later request them by sending getaddr messages. 
-    // Making users (which are behind NAT and can only make outgoing connections) ignore 
+    // to users' AddrMan and later request them by sending getaddr messages.
+    // Making users (which are behind NAT and can only make outgoing connections) ignore
     // getaddr message mitigates the attack.
     else if ((strCommand == "getaddr") && (pfrom->fInbound))
     {
@@ -3646,14 +3647,14 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             bool fInMemPool = mempool.lookup(hash, tx);
             if (!fInMemPool)
                 continue; // another thread removed since queryHashes, maybe...
-            
+
             // -- node requirements are packed into the top 32 bits of nServices
             if (pfrom->pfilter
                 && !pfrom->pfilter->IsRelevantAndUpdate(tx))
                 continue;
-            
+
             vInv.push_back(inv);
-            
+
             if (vInv.size() == MAX_INV_SZ)
             {
                 pfrom->PushMessage("inv", vInv);
@@ -4009,7 +4010,7 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
         {
             ResendWalletTransactions();
         }
- 
+
 
         // Address refresh broadcast
         static int64_t nLastRebroadcast;
