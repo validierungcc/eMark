@@ -31,6 +31,7 @@
 
 using namespace std;
 using namespace boost;
+using namespace boost::filesystem;
 
 #ifdef ENABLE_WALLET
 CWallet* pwalletMain = NULL;
@@ -575,7 +576,7 @@ bool AppInit2(boost::thread_group& threadGroup)
         if (!IsLimited(NET_IPV6))
             SetProxy(NET_IPV6, addrProxy);
         SetNameProxy(addrProxy);
-		
+
         fProxy = true;
     }
 
