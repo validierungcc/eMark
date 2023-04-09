@@ -316,6 +316,11 @@ public:
         return ret;
     }
 
+    CScript& operator=(const CScript& other) {
+        std::vector<unsigned char>::operator=(other);
+        return *this;
+    }
+
 
     //explicit CScript(char b) is not portable.  Use 'signed char' or 'unsigned char'.
     explicit CScript(signed char b)        { operator<<(b); }
